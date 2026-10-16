@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratório Interativo da Circunferência</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-green: #4ade80;
+      --accent-yellow: #facc15;
+      --accent-red: #f87171;
+      --accent-purple: #c084fc;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+      max-width: 800px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: var(--accent-blue);
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1rem;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 1000px;
+      width: 100%;
+    }
+
+    @media (max-width: 850px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .svg-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #090d16;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 10px;
+      min-height: 380px;
+    }
+
+    svg {
+      width: 100%;
+      height: 360px;
+      overflow: visible;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      accent-color: var(--accent-blue);
+      cursor: pointer;
+    }
+
+    .toggles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      background: #0f172a;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-btn input {
+      cursor: pointer;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-box {
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+    }
+
+    .stat-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .stat-formula {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .explanation-box {
+      background: #090d16;
+      border-left: 4px solid var(--accent-blue);
+      padding: 14px;
+      border-radius: 0 10px 10px 0;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .explanation-box h4 {
+      color: var(--accent-blue);
+      margin-bottom: 6px;
+    }
+
+    .legend-tag {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Laboratório da Circunferência</h1>
+    <p>Ferramenta visual interativa para ensinar Raio, Diâmetro, Centro, Corda e Perímetro</p>
+  </header>
+
+  <div class="container">
+    <!-- Painel Visual -->
+    <div class="card">
+      <div class="svg-container">
+        <svg id="canvas" viewBox="-180 -180 360 360">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#4ade80" />
+            </marker>
+          </defs>
+
+          <!-- Borda da Circunferência -->
+          <circle id="circunferencia" cx="0" cy="0" r="100" fill="none" stroke="#38bdf8" stroke-width="4" />
+
+          <!-- Diâmetro -->
+          <g id="grupo-diametro">
+            <line id="linha-diametro" x1="-100" y1="0" x2="100" y2="0" stroke="#c084fc" stroke-width="3" stroke-dasharray="4,4" />
+            <circle cx="-100" cy="0" r="4" fill="#c084fc" />
+            <circle cx="100" cy="0" r="4" fill="#c084fc" />
+          </g>
+
+          <!-- Corda Secundária -->
+          <g id="grupo-corda">
+            <line id="linha-corda" x1="-80" y1="-60" x2="80" y2="-60" stroke="#facc15" stroke-width="3" />
+            <circle id="ponto-corda-1" cx="-80" cy="-60" r="4" fill="#facc15" />
+            <circle id="ponto-corda-2" cx="80" cy="-60" r="4" fill="#facc15" />
+            <text id="label-corda" x="0" y="-70" fill="#facc15" font-size="12" text-anchor="middle" font-weight="bold">Corda</text>
+          </g>
+
+          <!-- Raio -->
+          <g id="grupo-raio">
+            <line id="linha-raio" x1="0" y1="0" x2="70.7" y2="70.7" stroke="#4ade80" stroke-width="3" marker-end="url(#arrow)" />
+            <text id="label-raio" x="42" y="35" fill="#4ade80" font-size="12" font-weight="bold">r</text>
+          </g>
+
+          <!-- Centro -->
+          <g id="grupo-centro">
+            <circle cx="0" cy="0" r="6" fill="#f87171" />
+            <text x="8" y="-8" fill="#f87171" font-size="13" font-weight="bold">Centro (O)</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Controles -->
+      <div class="controls">
+        <div class="control-group">
+          <label>
+            <span>Raio da Circunferência (r)</span>
+            <span id="label-valor-raio" style="color: var(--accent-green);">100 cm</span>
+          </label>
+          <input type="range" id="slider-raio" min="30" max="150" value="100">
+        </div>
+
+        <div class="control-group">
+          <label>
+            <span>Altura da Corda (mostra variação do tamanho)</span>
+            <span id="label-valor-corda" style="color: var(--accent-yellow);">-60 cm</span>
+          </label>
+          <input type="range" id="slider-corda" min="-140" max="140" value="-60">
+        </div>
+
+        <div class="toggles">
+          <label class="toggle-btn">
+            <input type="checkbox" id="chk-centro" checked>
+            <span><span class="legend-tag" style="background:#f87171;"></span>Centro (O)</span>
+          </label>
+          <label class="toggle-btn">
+            <input type="checkbox" id="chk-raio" checked>
+            <span><span class="legend-tag" style="background:#4ade80;"></span>Raio (r)</span>
+          </label>
+          <label class="toggle-btn">
+            <input type="checkbox" id="chk-diametro" checked>
+            <span><span class="legend-tag" style="background:#c084fc;"></span>Diâmetro (d)</span>
+          </label>
+          <label class="toggle-btn">
+            <input type="checkbox" id="chk-corda" checked>
+            <span><span class="legend-tag" style="background:#facc15;"></span>Corda</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Painel de Cálculos e Didática -->
+    <div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+      <div>
+        <h2 style="font-size:1.3rem; margin-bottom:16px; color:var(--accent-blue);">Resultados em Tempo Real</h2>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-title">Raio (r)</div>
+            <div class="stat-value" id="val-r" style="color:var(--accent-green);">100 cm</div>
+            <div class="stat-formula">r = d / 2</div>
+          </div>
+
+          <div class="stat-box">
+            <div class="stat-title">Diâmetro (d)</div>
+            <div class="stat-value" id="val-d" style="color:var(--accent-purple);">200 cm</div>
+            <div class="stat-formula">d = 2 · r</div>
+          </div>
+
+          <div class="stat-box" style="grid-column: span 2;">
+            <div class="stat-title">Perímetro / Comprimento (C)</div>
+            <div class="stat-value" id="val-c" style="color:var(--accent-blue);">628 cm</div>
+            <div class="stat-formula">C = 2 · π · r = π · d (adotando π ≈ 3,14)</div>
+          </div>
+
+          <div class="stat-box" style="grid-column: span 2;">
+            <div class="stat-title">Comprimento da Corda Selecionada</div>
+            <div class="stat-value" id="val-corda" style="color:var(--accent-yellow);">160 cm</div>
+            <div class="stat-formula" id="info-corda-max">Se passar pelo centro, medirá 200 cm (o diâmetro!)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="explanation-box">
+        <h4 id="box-titulo">💡 Dica Didática para a Aluna</h4>
+        <p id="box-texto">
+          Observe que o <strong>Diâmetro</strong> atravessa o <strong>Centro</strong> e vale exatamente o dobro do <strong>Raio</strong>.
+          Arraste a altura da <strong>Corda</strong> até 0 cm para ver que ela vira exatamente o próprio diâmetro!
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const sliderRaio = document.getElementById('slider-raio');
+    const sliderCorda = document.getElementById('slider-corda');
+    const labelRaio = document.getElementById('label-valor-raio');
+    const labelCorda = document.getElementById('label-valor-corda');
+
+    const chkCentro = document.getElementById('chk-centro');
+    const chkRaio = document.getElementById('chk-raio');
+    const chkDiametro = document.getElementById('chk-diametro');
+    const chkCorda = document.getElementById('chk-corda');
+
+    const circ = document.getElementById('circunferencia');
+    const grupoCentro = document.getElementById('grupo-centro');
+    const grupoRaio = document.getElementById('grupo-raio');
+    const grupoDiametro = document.getElementById('grupo-diametro');
+    const grupoCorda = document.getElementById('grupo-corda');
+
+    const linhaRaio = document.getElementById('linha-raio');
+    const labelRaioText = document.getElementById('label-raio');
+    const linhaDiametro = document.getElementById('linha-diametro');
+    const linhaCorda = document.getElementById('linha-corda');
+    const pontoCorda1 = document.getElementById('ponto-corda-1');
+    const pontoCorda2 = document.getElementById('ponto-corda-2');
+    const labelCordaText = document.getElementById('label-corda');
+
+    const valR = document.getElementById('val-r');
+    const valD = document.getElementById('val-d');
+    const valC = document.getElementById('val-c');
+    const valCorda = document.getElementById('val-corda');
+    const infoCordaMax = document.getElementById('info-corda-max');
+
+    function atualizar() {
+      const r = parseFloat(sliderRaio.value);
+      let cordaY = parseFloat(sliderCorda.value);
+
+      // Trava corda dentro do raio
+      if (Math.abs(cordaY) >= r) {
+        cordaY = Math.sign(cordaY) * (r - 1);
+        sliderCorda.value = cordaY;
+      }
+      sliderCorda.min = -r + 1;
+      sliderCorda.max = r - 1;
+
+      // Atualiza valores dos labels
+      labelRaio.textContent = `${r} cm`;
+      labelCorda.textContent = `Y = ${cordaY} cm`;
+
+      // Atualiza Circunferência
+      circ.setAttribute('r', r);
+
+      // Atualiza Raio (ângulo 45 graus)
+      const ang = Math.PI / 4;
+      const rx = r * Math.cos(ang);
+      const ry = r * Math.sin(ang);
+      linhaRaio.setAttribute('x2', rx);
+      linhaRaio.setAttribute('y2', ry);
+      labelRaioText.setAttribute('x', rx / 2 + 10);
+      labelRaioText.setAttribute('y', ry / 2 - 5);
+
+      // Atualiza Diâmetro
+      linhaDiametro.setAttribute('x1', -r);
+      linhaDiametro.setAttribute('x2', r);
+
+      // Atualiza Corda
+      const cordaMetade = Math.sqrt(Math.max(0, r * r - cordaY * cordaY));
+      linhaCorda.setAttribute('x1', -cordaMetade);
+      linhaCorda.setAttribute('y1', cordaY);
+      linhaCorda.setAttribute('x2', cordaMetade);
+      linhaCorda.setAttribute('y2', cordaY);
+      pontoCorda1.setAttribute('cx', -cordaMetade);
+      pontoCorda1.setAttribute('cy', cordaY);
+      pontoCorda2.setAttribute('cx', cordaMetade);
+      pontoCorda2.setAttribute('cy', cordaY);
+      labelCordaText.setAttribute('x', 0);
+      labelCordaText.setAttribute('y', cordaY - 8);
+
+      // Visibilidade
+      grupoCentro.style.display = chkCentro.checked ? 'block' : 'none';
+      grupoRaio.style.display = chkRaio.checked ? 'block' : 'none';
+      grupoDiametro.style.display = chkDiametro.checked ? 'block' : 'none';
+      grupoCorda.style.display = chkCorda.checked ? 'block' : 'none';
+
+      // Cálculos
+      const diametro = 2 * r;
+      const perimetro = (2 * 3.14 * r).toFixed(2).replace('.', ',');
+      const compCorda = (2 * cordaMetade).toFixed(2).replace('.', ',');
+
+      valR.textContent = `${r} cm`;
+      valD.textContent = `${diametro} cm`;
+      valC.textContent = `${perimetro} cm`;
+      valCorda.textContent = `${compCorda} cm`;
+
+      if (Math.abs(cordaY) < 2) {
+        infoCordaMax.innerHTML = `<span style="color:#4ade80; font-weight:bold;">Atenção:</span> A corda está passando pelo centro! Ela é o próprio Diâmetro (${diametro} cm)!`;
+      } else {
+        infoCordaMax.textContent = `A maior corda possível é o Diâmetro (${diametro} cm).`;
+      }
+    }
+
+    sliderRaio.addEventListener('input', atualizar);
+    sliderCorda.addEventListener('input', atualizar);
+    chkCentro.addEventListener('change', atualizar);
+    chkRaio.addEventListener('change', atualizar);
+    chkDiametro.addEventListener('change', atualizar);
+    chkCorda.addEventListener('change', atualizar);
+
+    atualizar();
+  </script>
+</body>
+</html>
